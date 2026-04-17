@@ -1,0 +1,7 @@
+id = "yaml-embedded-languages"
+name = "YAML Embedded Languages"
+description = "Support for syntax highlighting within YAML block-scalars."
+version = "1.3.0"
+schema_version = 1
+authors = ["Harry Downing <harrydowning.dev@gmail.com>"]
+repository = "https://github.com/harrydowning/vscode-yaml-embedded-languages"

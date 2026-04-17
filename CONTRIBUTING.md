@@ -1,28 +1,35 @@
 # Contributing
 
-Thank you for taking an interest in contributing to this project. All contributions are welcome. Please find below the suggested contribution, development, and release workflows.
+## Prerequisites
 
-## Contribution Workflow
+- Python 3.8+ (only required to regenerate `languages/yaml/injections.scm`)
+- [Zed](https://zed.dev) for manual testing
 
-- Raise/find an [issue](https://github.com/harrydowning/vscode-yaml-embedded-languages/issues) to fix
-- Fork the repository
-- Implement changes (see [development workflow](#development-workflow))
-- Create pull request
+## Adding or changing a supported language
 
-## Development Workflow
+The list of accepted identifiers and their target Zed languages lives in the
+`LANGUAGES` table at the top of [`generate.py`](generate.py). After editing
+it, regenerate the injection queries and commit both files:
 
-- Implement changes
-- Run `npm run generate` to update `package.json` and `syntaxes`
-- Run `npm run build` to update `dist/extension.js`
-- Use F5 within VS Code to test the extension
+```sh
+python3 generate.py
+```
 
-> [!NOTE]
->
-> - `package.json` is partially generated and `syntaxes` is fully generated. Relevant changes to these should be made in `src`.
-> - Any features intended for pre-release should be kept behind the `PRE_RELEASE` flag. These features can be enabled by setting the environment variable `PRE_RELEASE=true` on build and generate.
+`generate.py` performs a basic sanity check (balanced parentheses, trailing
+`)`) on the generated file and will exit non-zero if something is wrong.
 
-## Release Workflow
+## Testing locally
 
-- Update `version` in `package.json` and run `npm i` to update `package-lock.json`
-- Update `CHANGELOG.md` (ensure version links are set)
-- Merge to master with `[release]` or `[pre-release]` in the commit message
+1. Open Zed and run the **`zed: extensions`** command.
+2. Click **`Install Dev Extension`** and point it at this repository.
+3. Open [`example.yaml`](example.yaml) and verify that each marker produces
+   the expected embedded-language highlighting.
+4. When iterating, re-run `Install Dev Extension` (or Zed's dev-extension
+   reload affordance) after each change.
+
+## Checks run in CI
+
+- `python3 generate.py` must leave the working tree clean (i.e. the
+  committed `languages/yaml/injections.scm` must match the output of the
+  generator).
+- The generator's own sanity check must pass.

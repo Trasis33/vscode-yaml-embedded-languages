@@ -1,134 +1,117 @@
 <div align="center">
 
-# YAML Embedded Languages
+# YAML Embedded Languages (Zed)
 
 ![GitHub License](https://img.shields.io/github/license/harrydowning/yaml-embedded-languages?style=for-the-badge)
-![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/harrydowning.yaml-embedded-languages?style=for-the-badge)
-![Visual Studio Marketplace Downloads](https://img.shields.io/visual-studio-marketplace/d/harrydowning.yaml-embedded-languages?style=for-the-badge&color=rebeccapurple)
 
 </div>
 
+A [Zed](https://zed.dev) editor extension that adds syntax highlighting
+**inside YAML block-scalars** for 50+ languages. This is the Zed port of the
+original [`harrydowning.yaml-embedded-languages`](https://marketplace.visualstudio.com/items?itemName=harrydowning.yaml-embedded-languages)
+VS Code extension (the VS Code version is preserved on the `master` branch).
+
 ## Features
 
-Syntax highlighting within YAML block-scalars for [50+ built-in languages](#built-in-languages "Built-In Languages") and the ability to add highlighting for any other language with the [yaml-embedded-languages.include](#extension-settings "Extension Settings") configuration setting.
+Syntax highlighting within YAML block-scalars (`|` and `>`) using small
+marker comments that tell the editor which language the following content
+should be highlighted as.
 
 ![Example yaml file showing syntax highlighting](https://raw.githubusercontent.com/harrydowning/yaml-embedded-languages/master/images/example.png)
 
 ### Usage
 
-To highlight a single block, place a comment with the language identifier next to the block identifier.
+To highlight a single block, place a comment with the language identifier
+on the same line as the block-scalar indicator:
 
 ```yaml
-example: | # <language-identifier>
+example: | # python
   highlighted
 ```
 
-To highlight all blocks from a point onwards, place a comment with the extension name followed by the language identifier.
+To highlight all blocks from a point onwards, place a comment with the
+extension name followed by the language identifier. In Zed the injection is
+scoped to the immediately-following mapping entry (tree-sitter queries are
+stateless, so the VS Code "from this point onwards" behaviour cannot be
+reproduced exactly — add a marker above each block you want to highlight):
 
 ```yaml
-# yaml-embedded-languages: <language-identifier>
+# yaml-embedded-languages: python
 example: |
   highlighted
 ```
 
-To stop highlighting blocks place a comment with the extension name.
+### Built-in Languages
 
-```yaml
-# yaml-embedded-languages
-example: |
-  not highlighted
+The following identifiers are accepted (see [`generate.py`](generate.py) for
+the authoritative list and the Zed language each identifier maps to):
+
+`bat`, `bibtex`, `c`, `c#`, `c++`, `clojure`, `coffee`, `cpp`, `csharp`,
+`css`, `cuda`, `dart`, `diff`, `dockercompose`, `dockerfile`, `f#`,
+`fsharp`, `go`, `groovy`, `handlebars`, `hlsl`, `html`, `ini`, `jade`,
+`java`, `javascript`, `js`, `json`, `jsonc`, `jsonl`, `jsx`, `julia`,
+`latex`, `less`, `log`, `lua`, `make`, `makefile`, `markdown`, `math`,
+`objc`, `objcpp`, `perl`, `php`, `pip`, `powerfx`, `powershell`,
+`properties`, `py`, `python`, `r`, `raku`, `razor`, `regex`,
+`requirements`, `rst`, `ruby`, `rust`, `scss`, `shaderlab`, `shell`,
+`sql`, `swift`, `tex`, `ts`, `tsx`, `typescript`, `vb`, `xml`, `xsl`,
+`yaml`.
+
+Identifiers that reference a language not present in Zed or installed via
+another extension will simply not be highlighted.
+
+## Installation
+
+### From source (dev extension)
+
+Zed extensions are loaded directly from a local directory while developing.
+See [the Zed extension docs](https://zed.dev/docs/extensions/developing-extensions)
+for the full workflow.
+
+1. Clone this repository.
+2. In Zed, open the command palette and run **`zed: extensions`**.
+3. Click **`Install Dev Extension`** and select the cloned directory.
+4. Open any `.yaml` / `.yml` file and add a marker comment — the embedded
+   language should now be highlighted.
+
+### Publishing
+
+To publish this extension to the Zed extensions registry, submit a pull
+request to [`zed-industries/extensions`](https://github.com/zed-industries/extensions)
+adding this repository as a submodule under `extensions/yaml-embedded-languages/`.
+See the Zed docs for the up-to-date procedure.
+
+## Repository layout
+
+```
+extension.toml                 # Zed extension manifest
+languages/
+  yaml/
+    config.toml                # YAML language config (mirrors Zed's built-in)
+    injections.scm             # Tree-sitter injection queries (auto-generated)
+generate.py                    # Generator for injections.scm
+example.yaml                   # Sample file demonstrating all markers
 ```
 
-### Built-In Languages
+## How it works
 
-The following list shows all valid identifiers for the built-in languages:
+Zed uses tree-sitter and its injection queries to embed one language inside
+another. `languages/yaml/injections.scm` contains two query patterns per
+supported identifier:
 
-| Language         | Identifier            |
-| ---------------- | --------------------- |
-| bat              | `bat`                 |
-| bibtex           | `bibtex`              |
-| c                | `c`                   |
-| clojure          | `clojure`             |
-| coffeescript     | `coffee`              |
-| cpp              | `cpp`, `c++`          |
-| csharp           | `csharp`, `c#`        |
-| css              | `css`                 |
-| cuda-cpp         | `cuda`                |
-| dart             | `dart`                |
-| diff             | `diff`                |
-| dockercompose    | `dockercompose`       |
-| dockerfile       | `dockerfile`          |
-| fsharp           | `fsharp`, `f#`        |
-| go               | `go`                  |
-| groovy           | `groovy`              |
-| handlebars       | `handlebars`          |
-| hlsl             | `hlsl`                |
-| html             | `html`                |
-| ini              | `ini`                 |
-| jade             | `jade`                |
-| java             | `java`                |
-| javascript       | `js`, `javascript`    |
-| javascriptreact  | `jsx`                 |
-| json             | `json`                |
-| jsonc            | `jsonc`               |
-| jsonl            | `jsonl`               |
-| julia            | `julia`               |
-| latex            | `latex`               |
-| less             | `less`                |
-| log              | `log`                 |
-| lua              | `lua`                 |
-| makefile         | `make`, `makefile`    |
-| markdown         | `markdown`            |
-| markdown-math    | `math`                |
-| objective-c      | `objc`                |
-| objective-cpp    | `objcpp`              |
-| perl             | `perl`                |
-| php              | `php`                 |
-| pip-requirements | `pip`, `requirements` |
-| powerfx\*        | `powerfx`             |
-| powershell       | `powershell`          |
-| properties       | `properties`          |
-| python           | `py`, `python`        |
-| r                | `r`                   |
-| raku             | `raku`                |
-| razor            | `razor`               |
-| regex\*          | `regex`               |
-| restructuredtext | `rst`                 |
-| ruby             | `ruby`                |
-| rust             | `rust`                |
-| scss             | `scss`                |
-| shaderlab        | `shaderlab`           |
-| shellscript      | `shell`               |
-| sql              | `sql`                 |
-| swift            | `swift`               |
-| tex              | `tex`                 |
-| typescript       | `ts`, `typescript`    |
-| typescriptreact  | `tsx`                 |
-| vb               | `vb`                  |
-| xml              | `xml`                 |
-| xsl              | `xsl`                 |
-| yaml             | `yaml`                |
+1. An **inline** pattern matching a `(comment)` that immediately precedes
+   a `(block_scalar)` on the same line, e.g. `key: | # python`.
+2. A **block-wide** pattern matching a `(comment)` that immediately
+   precedes a `(block_mapping_pair)` whose value is a block-scalar, e.g.
+   `# yaml-embedded-languages: python\nkey: |\n  ...`.
 
-\*_Not a valid VS Code language_
-
-## Requirements
-
-None
-
-## Extension Settings
-
-| Name                              | Description                                                                                                                                                                                                                                                                                                                                                                           |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `yaml-embedded-languages.include` | An object where the key defines the language identifier with regex and the value specifies the language TextMate scope name. By default the language identifier will be used as the language name. To change this, the value can be specified as an object with properties including `name`, `scopeName` (required), and `stripIndent`. Hover over these in VS Code to find out more. |
-
-## Known Issues
-
-See [Issues](https://github.com/harrydowning/vscode-yaml-embedded-languages/issues)
+Each pattern uses a `#match?` predicate on the comment text and a
+`#set! injection.language` directive to select the embedded language.
 
 ## Contribution Notes
 
-See [CONTRIBUTING](CONTRIBUTING.md)
+See [CONTRIBUTING](CONTRIBUTING.md).
 
 ## Release Notes
 
-See [CHANGELOG](CHANGELOG.md)
+See [CHANGELOG](CHANGELOG.md).

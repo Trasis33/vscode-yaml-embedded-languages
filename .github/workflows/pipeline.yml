@@ -4,35 +4,27 @@ on:
   push:
     branches:
       - master
+      - main
   pull_request:
 
 jobs:
-  node-pipeline:
-    uses: harrydowning/github-workflows/.github/workflows/node-pipeline.yml@v1.0.0
-    with:
-      repository-owner: harrydowning
-      check-run: | # shell
-        set -x
-        npm i
-        npm run generate
-        [[ -z $(git status --porcelain) ]]
-        npm run type
-        npm run lint
-        npm run format
-      release-run: | # shell
-        set -x
-        npm i
-        npm run build
-        npm run package
-        npm run release
-        npm run publish
-      pre-release-run: | # shell
-        set -x
-        npm i
-        PRE_RELEASE=true
-        npm run generate
-        npm run build
-        npm run package -- --pre-release
-        npm run release -- --prerelease
-        npm run publish -- --pre-release
-    secrets: inherit
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Regenerate injections.scm
+        run: python3 generate.py
+
+      - name: Ensure generator output is committed
+        run: |
+          if ! git diff --quiet; then
+            echo "::error::languages/yaml/injections.scm is out of date."
+            echo "Run 'python3 generate.py' locally and commit the result."
+            git --no-pager diff
+            exit 1
+          fi
